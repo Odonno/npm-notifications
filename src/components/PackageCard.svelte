@@ -7,7 +7,7 @@
 
 	const notificationLevels = ['major', 'minor', 'patch'];
 
-	const onSaveNotificationPreferences = () => {
+	const onSaveNotificationPreferencesClicked = () => {
 		// TODO : save notification preferences in local storage
 	};
 </script>
@@ -28,5 +28,5 @@
 	</select>
 	<span>updates</span>
 
-	<button type="button" on:click={onSaveNotificationPreferences}>Ok</button>
+	<button type="button" on:click={onSaveNotificationPreferencesClicked}>Ok</button>
 </div>

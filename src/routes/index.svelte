@@ -1,10 +1,13 @@
 <script lang="ts">
-	// TODO : register/unregister for push notifications
-	// TODO : handle push notifications using Service Worker
+	// TODO : handle notifications using Service Worker
 	// TODO : packages pagination
 	// TODO : display watchlist
 
 	import PackageCard from '$components/PackageCard.svelte';
+	import {
+		areNotificationsPermissionGranted,
+		areNotificationsSupported
+	} from '$functions/notifications';
 
 	let search = '';
 
@@ -27,9 +30,39 @@
 				totalPages = total;
 			});
 	}
+
+	const notificationsSupported = areNotificationsSupported();
+	let notificationsPermission = notificationsSupported ? Notification.permission : undefined;
+
+	const onActivateNotificationsClicked = () => {
+		if (!notificationsSupported) {
+			console.log('This browser does not support notification.');
+			return;
+		}
+
+		if (areNotificationsPermissionGranted()) {
+			return;
+		}
+
+		if (Notification.permission !== 'denied') {
+			Notification.requestPermission((permission) => {
+				notificationsPermission = permission;
+			});
+		}
+	};
 </script>
 
-<button type="button" class="block">Activate notifications</button>
+{#if notificationsSupported}
+	{#if notificationsPermission === 'granted'}
+		<div>Notifications activated.</div>
+	{:else}
+		<button type="button" class="block" on:click={onActivateNotificationsClicked}>
+			Activate notifications
+		</button>
+	{/if}
+{:else}
+	<div>This browser does not support notifications.</div>
+{/if}
 
 <button type="button">Search packages</button>
 <button type="button">Watchlist</button>
