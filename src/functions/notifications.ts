@@ -1,5 +1,7 @@
+import { browser } from '$app/env';
+
 export const areNotificationsSupported = () => {
-	return 'Notification' in window;
+	return browser && 'Notification' in window;
 };
 
 export const areNotificationsPermissionGranted = () => {

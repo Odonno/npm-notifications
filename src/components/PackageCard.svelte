@@ -1,19 +1,47 @@
 <script lang="ts">
+	import { browser } from '$app/env';
+	import { db } from '$functions/db';
+	import { notificationLevels, type NotificationLevel, type NotificationPreference } from '$models';
+	import { liveQuery } from 'dexie';
+	import { onDestroy } from 'svelte';
+
 	export let displayedPackage: any;
 
-	// TODO : check if preferences already saved
+	let preference: NotificationPreference | undefined;
+	let notificationLevelSelected: NotificationLevel = 'patch';
 
-	let notificationLevelSelected = 'patch';
+	const savedNotificationPreference$ = liveQuery(() =>
+		browser ? db.notificationPreferences.get(displayedPackage.name) : undefined
+	);
 
-	const notificationLevels = ['major', 'minor', 'patch'];
+	const subscription = savedNotificationPreference$.subscribe((value) => {
+		preference = value;
+
+		if (preference) {
+			notificationLevelSelected = preference.level;
+		}
+	});
+
+	$: canSave = preference?.level !== notificationLevelSelected;
+
+	onDestroy(() => {
+		subscription.unsubscribe();
+	});
 
 	const onSaveNotificationPreferencesClicked = () => {
-		// TODO : save notification preferences in local storage
+		db.notificationPreferences.put({
+			package: displayedPackage.name,
+			currentVersion: displayedPackage.version,
+			level: notificationLevelSelected
+		});
 	};
 </script>
 
 <div>
 	Name: {displayedPackage.name}
+</div>
+<div>
+	Description: {displayedPackage.description}
 </div>
 <div>
 	Version: {displayedPackage.version}
@@ -28,5 +56,12 @@
 	</select>
 	<span>updates</span>
 
-	<button type="button" on:click={onSaveNotificationPreferencesClicked}>Ok</button>
+	<button
+		type="button"
+		class="disabled:bg-gray-400"
+		on:click={onSaveNotificationPreferencesClicked}
+		disabled={!canSave}
+	>
+		Ok
+	</button>
 </div>

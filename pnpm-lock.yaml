@@ -6,6 +6,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.27.0
   '@typescript-eslint/parser': ^5.27.0
   autoprefixer: ^10.4.7
+  dexie: ^3.2.2
   eslint: ^8.16.0
   eslint-config-prettier: ^8.3.0
   eslint-plugin-svelte3: ^4.0.0
@@ -26,6 +27,7 @@ devDependencies:
   '@typescript-eslint/eslint-plugin': 5.30.3_a1cb1af85df6381fe2995addbc338175
   '@typescript-eslint/parser': 5.30.3_eslint@8.18.0+typescript@4.7.4
   autoprefixer: 10.4.7_postcss@8.4.14
+  dexie: 3.2.2
   eslint: 8.18.0
   eslint-config-prettier: 8.5.0_eslint@8.18.0
   eslint-plugin-svelte3: 4.0.0_eslint@8.18.0+svelte@3.48.0
@@ -672,6 +674,11 @@ packages:
       acorn-node: 1.8.2
       defined: 1.0.0
       minimist: 1.2.6
+    dev: true
+
+  /dexie/3.2.2:
+    resolution: {integrity: sha512-q5dC3HPmir2DERlX+toCBbHQXW5MsyrFqPFcovkH9N2S/UW/H3H5AWAB6iEOExeraAu+j+zRDG+zg/D7YhH0qg==}
+    engines: {node: '>=6.0'}
     dev: true
 
   /didyoumean/1.2.2:
