@@ -7,7 +7,3 @@ export const areNotificationsSupported = () => {
 export const areNotificationsPermissionGranted = () => {
 	return Notification.permission === 'granted';
 };
-
-export const createNotification = (title: string) => {
-	return new Notification(title);
-};

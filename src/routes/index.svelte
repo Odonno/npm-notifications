@@ -1,5 +1,5 @@
 <script lang="ts">
-	// TODO : handle notifications using Service Worker
+	// TODO : install app button (no notifications otherwise due to periodic sync only working on PWA mode)
 	// TODO : packages pagination
 	// TODO : display watchlist
 
