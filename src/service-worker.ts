@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { db } from './functions/db';
 import { build, files, version } from '$service-worker';
-import semverDiff from 'semver-diff';
+import { shouldNotify } from './functions/notificationPreferences';
 
 const worker = self as unknown as ServiceWorkerGlobalScope;
 const FILES = `cache${version}`;
@@ -88,40 +88,24 @@ async function fetchAndNotifyPackageUpdates() {
 	const notificationPreferences = await db.notificationPreferences.toArray();
 
 	const promises = notificationPreferences.map(async (notificationPreference) => {
-		const { package: name, level, currentVersion } = notificationPreference;
+		const { package: name, currentVersion } = notificationPreference;
 
 		const response = await fetch(`https://registry.npmjs.org/${name}/latest`);
 		const result = await response.json();
 
 		const newVersion = result.version;
 
-		const diff = semverDiff(currentVersion, newVersion);
-
-		let shouldNotify = false;
-
-		if (level === 'patch') {
-			shouldNotify = diff === 'major' || diff === 'minor' || diff === 'patch';
-		}
-		if (level === 'minor') {
-			shouldNotify = diff === 'major' || diff === 'minor';
-		}
-		if (level === 'major') {
-			shouldNotify = diff === 'major';
+		if (currentVersion === newVersion) {
+			return;
 		}
 
-		const nestedPromises: Promise<unknown>[] = [];
-
-		if (shouldNotify) {
-			nestedPromises.push(createNotification(`${name} v${newVersion} is now available.`));
+		if (shouldNotify(notificationPreference, newVersion)) {
+			await createNotification(`${name} v${newVersion} is now available.`);
 		}
 
-		nestedPromises.push(
-			db.notificationPreferences.update(name, {
-				currentVersion: newVersion
-			})
-		);
-
-		return Promise.all(nestedPromises);
+		await db.notificationPreferences.update(name, {
+			currentVersion: newVersion
+		});
 	});
 
 	return Promise.all(promises);
