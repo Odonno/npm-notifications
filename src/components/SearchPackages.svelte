@@ -6,12 +6,12 @@
 	const itemsPerPage = 20;
 
 	let page = 1;
-	let totalItems = 1;
+	let totalItems = 0;
 	let displayedPackages: any[] = [];
 
 	$: {
 		page = 1;
-		totalItems = 1;
+		totalItems = 0;
 
 		const from = page - 1;
 
