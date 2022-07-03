@@ -1,35 +1,15 @@
 <script lang="ts">
 	// TODO : install app button (no notifications otherwise due to periodic sync only working on PWA mode)
-	// TODO : packages pagination
-	// TODO : display watchlist
 
-	import PackageCard from '$components/PackageCard.svelte';
+	import SearchPackages from '$components/SearchPackages.svelte';
 	import {
 		areNotificationsPermissionGranted,
 		areNotificationsSupported
 	} from '$functions/notifications';
 
-	let search = '';
+	type PageTab = 'search' | 'watchlist';
 
-	let page = 1;
-	let totalPages = 1;
-	let displayedPackages: any[] = [];
-
-	$: {
-		page = 1;
-		totalPages = 1;
-
-		const from = page - 1;
-
-		fetch(`https://registry.npmjs.org/-/v1/search?text=${search}&from=${from}`)
-			.then((response) => response.json())
-			.then((result) => {
-				const { objects, total } = result;
-
-				displayedPackages = objects.map((o: any) => o.package);
-				totalPages = total;
-			});
-	}
+	let selectedTab: PageTab = 'search';
 
 	const notificationsSupported = areNotificationsSupported();
 	let notificationsPermission = notificationsSupported ? Notification.permission : undefined;
@@ -50,31 +30,60 @@
 			});
 		}
 	};
+
+	const onSearchButtonClicked = () => {
+		selectedTab = 'search';
+	};
+
+	const onWatchlistButtonClicked = () => {
+		selectedTab = 'watchlist';
+	};
 </script>
 
-{#if notificationsSupported}
-	{#if notificationsPermission === 'granted'}
-		<div>Notifications activated.</div>
-	{:else}
-		<button type="button" class="block" on:click={onActivateNotificationsClicked}>
-			Activate notifications
+<section>
+	<div class="flex items-center justify-center mt-4">
+		{#if notificationsSupported}
+			{#if notificationsPermission === 'granted'}
+				<div class="bg-green-400 text-green-50 w-fit px-6 py-2 rounded">
+					Notifications activated
+				</div>
+			{:else}
+				<button type="button" class="block" on:click={onActivateNotificationsClicked}>
+					Activate notifications
+				</button>
+			{/if}
+		{:else}
+			<div class="bg-red-400 text-red-50 w-fit px-6 py-2 rounded">
+				This browser does not support notifications
+			</div>
+		{/if}
+	</div>
+
+	<nav class="mt-6 flex items-center justify-center">
+		<button
+			type="button"
+			class="p-4 border-2 border-gray-100 disabled:border-none w-40"
+			disabled={selectedTab === 'search'}
+			on:click={onSearchButtonClicked}
+		>
+			Search packages
 		</button>
-	{/if}
-{:else}
-	<div>This browser does not support notifications.</div>
-{/if}
+		<button
+			type="button"
+			class="p-4 border-2 border-gray-100 disabled:border-none w-40"
+			disabled={selectedTab === 'watchlist'}
+			on:click={onWatchlistButtonClicked}
+		>
+			Watchlist
+		</button>
+	</nav>
 
-<button type="button">Search packages</button>
-<button type="button">Watchlist</button>
-
-<div>
-	<input type="search" bind:value={search} placeholder="Search packages" />
-</div>
-
-<ol>
-	{#each displayedPackages as displayedPackage (displayedPackage.name)}
-		<li class="m-4 shadow-md p-4">
-			<PackageCard {displayedPackage} />
-		</li>
-	{/each}
-</ol>
+	<div class="mt-4">
+		{#if selectedTab === 'search'}
+			<SearchPackages />
+		{:else}
+			<!-- TODO : display watchlist -->
+			<div>TODO</div>
+		{/if}
+	</div>
+</section>

@@ -37,31 +37,36 @@
 	};
 </script>
 
-<div>
-	Name: {displayedPackage.name}
+<div class="font-bold text-lg">
+	{displayedPackage.name}
 </div>
-<div>
-	Description: {displayedPackage.description}
-</div>
-<div>
-	Version: {displayedPackage.version}
+<div class="text-sm text-gray-700">
+	{displayedPackage.description}
 </div>
 
-<div>
-	<span>Notify me of {displayedPackage.name} on</span>
-	<select bind:value={notificationLevelSelected}>
-		{#each notificationLevels as notificationLevel}
-			<option>{notificationLevel}</option>
-		{/each}
-	</select>
-	<span>updates</span>
+<div class="mt-2 flex items-center">
+	<div class="text-sm text-gray-600">
+		{displayedPackage.version}
+	</div>
 
-	<button
-		type="button"
-		class="disabled:bg-gray-400"
-		on:click={onSaveNotificationPreferencesClicked}
-		disabled={!canSave}
-	>
-		Ok
-	</button>
+	<div class="ml-2 text-gray-600">•</div>
+
+	<div class="ml-2 text-sm">
+		<span>Notify me of <b>{displayedPackage.name}</b> on</span>
+		<select bind:value={notificationLevelSelected}>
+			{#each notificationLevels as notificationLevel}
+				<option>{notificationLevel}</option>
+			{/each}
+		</select>
+		<span>updates</span>
+
+		<button
+			type="button"
+			class="ml-2 disabled:bg-gray-400 bg-black text-white px-2 py-1 rounded"
+			on:click={onSaveNotificationPreferencesClicked}
+			disabled={!canSave}
+		>
+			Ok
+		</button>
+	</div>
 </div>
