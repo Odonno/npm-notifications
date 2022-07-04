@@ -1,7 +1,9 @@
 <script lang="ts">
+	// TODO : remove notifications permission UI and ask user to allow notifications on "Ok" buttons
 	// TODO : install app button (no notifications otherwise due to periodic sync only working on PWA mode)
 
 	import SearchPackages from '$components/SearchPackages.svelte';
+	import Watchlist from '$components/Watchlist.svelte';
 	import {
 		areNotificationsPermissionGranted,
 		areNotificationsSupported
@@ -82,8 +84,7 @@
 		{#if selectedTab === 'search'}
 			<SearchPackages />
 		{:else}
-			<!-- TODO : display watchlist -->
-			<div>TODO</div>
+			<Watchlist />
 		{/if}
 	</div>
 </section>
