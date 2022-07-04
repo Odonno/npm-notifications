@@ -31,6 +31,7 @@
 	const onSaveNotificationPreferencesClicked = () => {
 		db.notificationPreferences.put({
 			package: displayedPackage.name,
+			description: displayedPackage.description,
 			currentVersion: displayedPackage.version,
 			level: notificationLevelSelected
 		});

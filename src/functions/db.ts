@@ -8,7 +8,7 @@ class AppStorage extends Dexie {
 		super('myDatabase');
 
 		this.version(1).stores({
-			notificationPreferences: '++package, currentVersion, level' // Primary key and indexed props
+			notificationPreferences: '++package, currentVersion, level, description'
 		});
 	}
 }
