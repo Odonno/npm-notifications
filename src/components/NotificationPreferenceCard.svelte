@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { db } from '$functions/db';
+	import { requireNotificationsPermission } from '$functions/notifications';
 	import { notificationLevels, type NotificationLevel, type NotificationPreference } from '$models';
 
 	export let preference: NotificationPreference;
@@ -8,8 +9,10 @@
 
 	$: canSave = preference?.level !== notificationLevelSelected;
 
-	const onSaveNotificationPreferencesClicked = () => {
-		db.notificationPreferences.update(preference.package, {
+	const onSaveNotificationPreferencesClicked = async () => {
+		await requireNotificationsPermission();
+
+		await db.notificationPreferences.update(preference.package, {
 			level: notificationLevelSelected
 		});
 	};

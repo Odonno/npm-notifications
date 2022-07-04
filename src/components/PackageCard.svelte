@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/env';
 	import { db } from '$functions/db';
+	import { requireNotificationsPermission } from '$functions/notifications';
 	import { notificationLevels, type NotificationLevel, type NotificationPreference } from '$models';
 	import { liveQuery } from 'dexie';
 	import { onDestroy } from 'svelte';
@@ -28,8 +29,10 @@
 		subscription.unsubscribe();
 	});
 
-	const onSaveNotificationPreferencesClicked = () => {
-		db.notificationPreferences.put({
+	const onSaveNotificationPreferencesClicked = async () => {
+		await requireNotificationsPermission();
+
+		await db.notificationPreferences.put({
 			package: displayedPackage.name,
 			description: displayedPackage.description,
 			currentVersion: displayedPackage.version,

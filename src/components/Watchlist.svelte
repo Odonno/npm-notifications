@@ -23,6 +23,8 @@
 	});
 </script>
 
+<!-- ask notification permission if not granted and at least 1 active notification -->
+
 {#if count}
 	<div class="font-bold p-4 bg-gray-100 text-lg">
 		{count} active notifications
