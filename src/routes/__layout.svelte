@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/env';
+	import Layout from '$components/Layout.svelte';
 	import '../app.css';
 
 	async function registerBackgroundTask() {
@@ -34,4 +35,6 @@
 	<title>npm notifications</title>
 </svelte:head>
 
-<slot />
+<Layout>
+	<slot />
+</Layout>

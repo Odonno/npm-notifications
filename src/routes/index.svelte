@@ -1,87 +1,51 @@
 <script lang="ts">
-	import { browser } from '$app/env';
-	import SearchPackages from '$components/SearchPackages.svelte';
-	import Watchlist from '$components/Watchlist.svelte';
+	import PackageCard from '$components/PackageCard.svelte';
+	import { searchStore } from '$stores/search';
 
-	type PageTab = 'search' | 'watchlist';
-	type DisplayModeLaunch = 'standalone' | 'fullscreen' | 'minimal-ui' | 'browser tab';
+	const { value, displayedPackages, page, totalPackages } = searchStore;
 
-	let selectedTab: PageTab = 'search';
-	let displayModeLaunch: DisplayModeLaunch | undefined;
-	let deferredPrompt: any;
+	const itemsPerPage = 20;
 
-	const onInstallAppButtonClicked = async () => {
-		if (deferredPrompt !== undefined) {
-			deferredPrompt.prompt();
+	$: {
+		page.set(1);
+		totalPackages.set(0);
 
-			const { outcome } = await deferredPrompt.userChoice;
+		const from = $page - 1;
 
-			if (outcome === 'accepted') {
-				deferredPrompt = undefined;
-			}
-		}
-	};
+		fetch(`https://registry.npmjs.org/-/v1/search?text=${$value}&from=${from}`)
+			.then((response) => response.json())
+			.then((result) => {
+				const { objects, total } = result;
 
-	const onSearchButtonClicked = () => {
-		selectedTab = 'search';
-	};
-
-	const onWatchlistButtonClicked = () => {
-		selectedTab = 'watchlist';
-	};
-
-	if (browser) {
-		window.addEventListener('beforeinstallprompt', (e) => {
-			deferredPrompt = e;
-		});
-
-		if (window.matchMedia('(display-mode: standalone)').matches) {
-			displayModeLaunch = 'standalone';
-		} else {
-			displayModeLaunch = 'browser tab';
-		}
+				displayedPackages.set(objects.map((o: any) => o.package));
+				totalPackages.set(total);
+			});
 	}
 </script>
 
-{#if displayModeLaunch === 'browser tab' && !!deferredPrompt}
-	<div class="w-full p-2 text-xs bg-blue-600 text-blue-100 flex items-center justify-center">
-		<div class="mr-1">
-			This app is designed to run as a PWA. Please install it to use all of its features.
-		</div>
+<div class="p-2">
+	<div class="m-2 mb-0">
+		<input
+			type="search"
+			bind:value={$value}
+			class="w-full p-2 bg-gray-100 h-[40px]"
+			placeholder="Search packages"
+			autocomplete="off"
+		/>
+	</div>
+</div>
 
-		<button
-			type="button"
-			class="ml-1 px-3 py-1.5 border border-white rounded"
-			on:click={onInstallAppButtonClicked}
-		>
-			Install app
-		</button>
+{#if $totalPackages}
+	<div class="font-bold p-4 bg-gray-100 text-lg">
+		{$totalPackages} packages found
+		<!-- TODO : packages pagination -->
 	</div>
 {/if}
 
-<nav class="mt-6 flex items-center justify-center">
-	<button
-		type="button"
-		class="p-4 border-2 border-gray-100 disabled:border-none w-40"
-		disabled={selectedTab === 'search'}
-		on:click={onSearchButtonClicked}
-	>
-		Search packages
-	</button>
-	<button
-		type="button"
-		class="p-4 border-2 border-gray-100 disabled:border-none w-40"
-		disabled={selectedTab === 'watchlist'}
-		on:click={onWatchlistButtonClicked}
-	>
-		Watchlist
-	</button>
-</nav>
-
-<div class="mt-4">
-	{#if selectedTab === 'search'}
-		<SearchPackages />
-	{:else}
-		<Watchlist />
-	{/if}
-</div>
+<ol>
+	{#each $displayedPackages as displayedPackage (displayedPackage.name)}
+		<li class="mx-2 border-b border-gray-200 p-4">
+			<PackageCard {displayedPackage} />
+		</li>
+	{/each}
+</ol>
