@@ -1,27 +1,24 @@
 <script lang="ts">
 	import PackageCard from '$components/PackageCard.svelte';
+	import { searchStore } from '$stores/search';
 
-	let search = '';
+	const { value, displayedPackages, page, totalPackages } = searchStore;
 
 	const itemsPerPage = 20;
 
-	let page = 1;
-	let totalItems = 0;
-	let displayedPackages: any[] = [];
-
 	$: {
-		page = 1;
-		totalItems = 0;
+		page.set(1);
+		totalPackages.set(0);
 
-		const from = page - 1;
+		const from = $page - 1;
 
-		fetch(`https://registry.npmjs.org/-/v1/search?text=${search}&from=${from}`)
+		fetch(`https://registry.npmjs.org/-/v1/search?text=${$value}&from=${from}`)
 			.then((response) => response.json())
 			.then((result) => {
 				const { objects, total } = result;
 
-				displayedPackages = objects.map((o: any) => o.package);
-				totalItems = total;
+				displayedPackages.set(objects.map((o: any) => o.package));
+				totalPackages.set(total);
 			});
 	}
 </script>
@@ -30,7 +27,7 @@
 	<div class="m-2 mb-0">
 		<input
 			type="search"
-			bind:value={search}
+			bind:value={$value}
 			class="w-full p-2 bg-gray-100 h-[40px]"
 			placeholder="Search packages"
 			autocomplete="off"
@@ -38,15 +35,15 @@
 	</div>
 </div>
 
-{#if totalItems}
+{#if $totalPackages}
 	<div class="font-bold p-4 bg-gray-100 text-lg">
-		{totalItems} packages found
+		{$totalPackages} packages found
 		<!-- TODO : packages pagination -->
 	</div>
 {/if}
 
 <ol>
-	{#each displayedPackages as displayedPackage (displayedPackage.name)}
+	{#each $displayedPackages as displayedPackage (displayedPackage.name)}
 		<li class="mx-2 border-b border-gray-200 p-4">
 			<PackageCard {displayedPackage} />
 		</li>

@@ -15,7 +15,8 @@ const config = {
 		alias: {
 			$components: 'src/components',
 			$functions: 'src/functions',
-			$models: 'src/models'
+			$models: 'src/models',
+			$stores: 'src/stores'
 		},
 		adapter: adapter()
 	}
