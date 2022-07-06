@@ -1,16 +1,34 @@
 <script lang="ts">
 	import PackageCard from '$components/PackageCard.svelte';
 	import { searchStore } from '$stores/search';
+	import { page } from '$app/stores';
 
-	const { value, displayedPackages, page, totalPackages } = searchStore;
+	$: pageParam = $page.url.searchParams.get('page');
+	$: currentPage = pageParam ? parseInt(pageParam) : 1;
+
+	const { value, displayedPackages, totalPackages } = searchStore;
 
 	const itemsPerPage = 20;
 
-	$: {
-		page.set(1);
-		totalPackages.set(0);
+	$: totalPages = Math.ceil($totalPackages / itemsPerPage);
 
-		const from = $page - 1;
+	const firstPagination = 1;
+	$: previousPagination = currentPage > 1 ? [currentPage - 1] : [];
+	$: nextPagination = currentPage < totalPages ? [currentPage + 1] : [];
+	$: lastPagination = totalPages > 0 ? [totalPages] : [];
+
+	$: displayedPagination = Array.from(
+		new Set([
+			firstPagination,
+			...previousPagination,
+			currentPage,
+			...nextPagination,
+			...lastPagination
+		])
+	);
+
+	$: {
+		const from = (currentPage - 1) * itemsPerPage;
 
 		fetch(`https://registry.npmjs.org/-/v1/search?text=${$value}&from=${from}`)
 			.then((response) => response.json())
@@ -36,10 +54,22 @@
 </div>
 
 {#if $totalPackages}
-	<div class="font-bold p-4 bg-gray-100 text-lg">
+	<div class="font-bold p-4 bg-gray-100 text-base">
 		{$totalPackages} packages found
-		<!-- TODO : packages pagination -->
 	</div>
+{/if}
+
+{#if displayedPagination.length > 1}
+	<nav class="flex items-center justify-end p-4">
+		{#each displayedPagination as pagination}
+			<a
+				href={`/?page=${pagination}`}
+				sveltekit:noscroll
+				class="mx-1 px-2 py-1 border"
+				class:font-bold={currentPage === pagination}>{pagination}</a
+			>
+		{/each}
+	</nav>
 {/if}
 
 <ol>
@@ -49,3 +79,16 @@
 		</li>
 	{/each}
 </ol>
+
+{#if displayedPagination.length > 1}
+	<nav class="flex items-center justify-end p-4">
+		{#each displayedPagination as pagination}
+			<a
+				href={`/?page=${pagination}`}
+				sveltekit:noscroll
+				class="mx-1 px-2 py-1 border"
+				class:font-bold={currentPage === pagination}>{pagination}</a
+			>
+		{/each}
+	</nav>
+{/if}
