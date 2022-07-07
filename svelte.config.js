@@ -18,9 +18,6 @@ const config = {
 			$models: 'src/models',
 			$stores: 'src/stores'
 		},
-		prerender: {
-			default: true
-		},
 		adapter: adapter()
 	}
 };

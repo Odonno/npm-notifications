@@ -1,3 +1,7 @@
+<script context="module">
+	export const prerender = true;
+</script>
+
 <script lang="ts">
 	import { browser } from '$app/env';
 	import NotificationPreferenceCard from '$components/NotificationPreferenceCard.svelte';
