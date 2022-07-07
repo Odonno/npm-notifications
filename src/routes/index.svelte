@@ -2,13 +2,21 @@
 	import PackageCard from '$components/PackageCard.svelte';
 	import { searchStore } from '$stores/search';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	$: pageParam = $page.url.searchParams.get('page');
 	$: currentPage = pageParam ? parseInt(pageParam) : 1;
 
-	const { value, displayedPackages, totalPackages } = searchStore;
+	$: searchParam = $page.url.searchParams.get('search');
+	$: search = searchParam ? searchParam : '';
+
+	const { displayedPackages, totalPackages } = searchStore;
 
 	const itemsPerPage = 20;
+
+	let value = '';
+	let searchInput: HTMLInputElement | undefined;
 
 	$: totalPages = Math.ceil($totalPackages / itemsPerPage);
 
@@ -30,7 +38,7 @@
 	$: {
 		const from = (currentPage - 1) * itemsPerPage;
 
-		fetch(`https://registry.npmjs.org/-/v1/search?text=${$value}&from=${from}`)
+		fetch(`https://registry.npmjs.org/-/v1/search?text=${search}&from=${from}`)
 			.then((response) => response.json())
 			.then((result) => {
 				const { objects, total } = result;
@@ -39,16 +47,35 @@
 				totalPackages.set(total);
 			});
 	}
+
+	onMount(() => {
+		value = search;
+
+		if (searchInput) {
+			searchInput.focus();
+		}
+	});
+
+	const onSearchInput = async () => {
+		const url = value ? `?search=${value}` : '/';
+		await goto(url, { replaceState: true });
+
+		if (searchInput) {
+			searchInput.focus();
+		}
+	};
 </script>
 
 <div class="p-2">
 	<div class="m-2 mb-0">
 		<input
 			type="search"
-			bind:value={$value}
+			bind:value
 			class="w-full p-2 bg-gray-100 h-[40px]"
 			placeholder="Search packages"
 			autocomplete="off"
+			on:input={onSearchInput}
+			bind:this={searchInput}
 		/>
 	</div>
 </div>
@@ -63,7 +90,7 @@
 	<nav class="flex items-center justify-end p-4">
 		{#each displayedPagination as pagination}
 			<a
-				href={`/?page=${pagination}`}
+				href={`/?search=${value}&page=${pagination}`}
 				sveltekit:noscroll
 				class="mx-1 px-2 py-1 border"
 				class:font-bold={currentPage === pagination}>{pagination}</a
@@ -84,7 +111,7 @@
 	<nav class="flex items-center justify-end p-4">
 		{#each displayedPagination as pagination}
 			<a
-				href={`/?page=${pagination}`}
+				href={`/?search=${value}&page=${pagination}`}
 				sveltekit:noscroll
 				class="mx-1 px-2 py-1 border"
 				class:font-bold={currentPage === pagination}>{pagination}</a
