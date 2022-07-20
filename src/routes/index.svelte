@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/env';
 
 	$: pageParam = $page.url.searchParams.get('page');
 	$: currentPage = pageParam ? parseInt(pageParam) : 1;
@@ -36,16 +37,18 @@
 	);
 
 	$: {
-		const from = (currentPage - 1) * itemsPerPage;
+		if (browser) {
+			const from = (currentPage - 1) * itemsPerPage;
 
-		fetch(`https://registry.npmjs.org/-/v1/search?text=${search}&from=${from}`)
-			.then((response) => response.json())
-			.then((result) => {
-				const { objects, total } = result;
+			fetch(`https://registry.npmjs.org/-/v1/search?text=${search}&from=${from}`)
+				.then((response) => response.json())
+				.then((result) => {
+					const { objects, total } = result;
 
-				displayedPackages.set(objects.map((o: any) => o.package));
-				totalPackages.set(total);
-			});
+					displayedPackages.set(objects.map((o: any) => o.package));
+					totalPackages.set(total);
+				});
+		}
 	}
 
 	onMount(() => {
